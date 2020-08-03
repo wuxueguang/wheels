@@ -12,9 +12,9 @@ export default [{
     format: 'umd'
   }
 }, {
-  input: 'src/test/EventEmitter.test',
+  input: 'test/EventEmitter.test',
   output: {
-    file: 'test/EventEmitter.test.js',
+    file: 'dist/test/EventEmitter.test.js',
     format: 'cjs'
   }
 }];
