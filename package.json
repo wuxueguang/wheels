@@ -1,0 +1,22 @@
+{
+  "name": "wheels",
+  "version": "1.0.0",
+  "description": "Learnn more API by coding them.",
+  "main": "index.js",
+  "scripts": {
+    "dev": "cross-env rollup --watch --config rollup.config.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/wuxueguang/wheels.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/wuxueguang/wheels/issues"
+  },
+  "homepage": "https://github.com/wuxueguang/wheels#readme",
+  "devDependencies": {
+    "cross-env": "^7.0.2"
+  }
+}
