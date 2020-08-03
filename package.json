@@ -17,6 +17,8 @@
   },
   "homepage": "https://github.com/wuxueguang/wheels#readme",
   "devDependencies": {
-    "cross-env": "^7.0.2"
+    "babel-eslint": "^10.1.0",
+    "cross-env": "^7.0.2",
+    "exlint": "^0.1.6"
   }
 }

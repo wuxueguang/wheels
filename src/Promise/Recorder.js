@@ -1,7 +1,7 @@
 
 import EventEmitter from '../EventEmitter/index';
-import {isFunc} from './utils';
-import {FULFILLED, REJECTED} from './consts';
+import { isFunc } from '../utils/index';
+import { FULFILLED, REJECTED } from './consts';
 
 class Recorder{
     settled = false
