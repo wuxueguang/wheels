@@ -1,4 +1,10 @@
-import { isFunc } from "../utils/index";
+'use strict';
+
+const { toString } = Object.prototype;
+
+const isFunction = func => toString.call(func) === '[object Function]';
+const isFunc = isFunction;
+  //
 
 const RECORDER = Symbol('recorder key');
 
@@ -40,4 +46,11 @@ class EventEmitter{
     }
 }
 
-export default EventEmitter;
+const eventEmitter = new EventEmitter;
+
+eventEmitter.on('test', () => {
+    console.log('------');
+});
+
+eventEmitter.emit('test');
+eventEmitter.emit('test');

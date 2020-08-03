@@ -82,11 +82,15 @@
         emit(eventType, ...args){
             if(Array.isArray(this[RECORDER$1].get(eventType))){
                 this[RECORDER$1].get(eventType).forEach(handler => {
-                    handler(...args);
+                    if(isFunc(handler) && handler.left > 0){
+                        handler(...args);
+                        handler.left -= 1;
+                    }
                 });
             }
         }
         addListener(eventType, handler){
+            handler.left = handler.left || Infinity;
             if(!Array.isArray(this[RECORDER$1].get(eventType))){
                 this[RECORDER$1].set(eventType, []);
             }
@@ -95,6 +99,19 @@
         }
         on(eventType, handler){
             return this.addListener(eventType, handler);
+        }
+        removeListener(eventType, handler){
+            const handlers = this[RECORDER$1].get(eventType);
+            while(handlers.includes(handler)){
+                handler[handler.indexOf(handler)] = undefined;
+            }
+        }
+        off(eventType, handler){
+            this.removeListener(eventType, handler);
+        }
+        once(eventType, handler){
+            handler.left = 1;
+            this.addListener(eventType, handler);
         }
     }
 

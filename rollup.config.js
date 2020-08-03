@@ -11,4 +11,10 @@ export default [{
     file: 'dist/umd/Promise.development.js',
     format: 'umd'
   }
+}, {
+  input: 'src/test/EventEmitter.test',
+  output: {
+    file: 'test/EventEmitter.test.js',
+    format: 'cjs'
+  }
 }];
