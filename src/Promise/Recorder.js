@@ -23,10 +23,11 @@ class Recorder{
                     detail.data = handler(this.result);
                     detail.settledStatus = FULFILLED;
                 }catch(err){
-                    detail.rejectReason = err;
+                    detail.rejectedReason = err;
                     detail.settledStatus = REJECTED;
                 }
                 this.eventEmitter.emit(`fulfilledHandlerCalled_${handler.idx}`, {detail});
+                return detail;
             }
         }
     }
@@ -39,10 +40,11 @@ class Recorder{
                     detail.data = handler(this.result);
                     detail.settledStatus = FULFILLED;
                 }catch(err){
-                    detail.rejectReason = err;
+                    detail.rejectedReason = err;
                     detail.settledStatus = REJECTED;
                 }
                 this.eventEmitter.emit(`fulfilledHandlerCalled_${handler.idx}`, {detail});
+                return detail;
             }
         }
     }
@@ -61,28 +63,28 @@ class Recorder{
                     detail.data = handler(data);
                     detail.settledStatus = FULFILLED;
                 }catch(err){
-                    detail.rejectReason = err;
+                    detail.rejectedReason = err;
                     detail.settledStatus = REJECTED;
                 }
                 this.eventEmitter.emit(`fulfilledHandlerCalled_${handler.idx}`, {detail});
             });
         }
     }
-    reject(rejectReason){
+    reject(rejectedReason){
         if(!this.settled){
             this.settled = true;
             this.rejected = true;
-            this.result = rejectReason;
+            this.result = rejectedReason;
 
             this.eventEmitter.emit(REJECTED);
 
             this.rejectedHandlers.forEach(handler => {
                 const detail = {};
                 try{
-                    detail.data = handler(rejectReason);
+                    detail.data = handler(rejectedReason);
                     detail.settledStatus = FULFILLED;
                 }catch(err){
-                    detail.rejectReason = err;
+                    detail.rejectedReason = err;
                     detail.settledStatus = REJECTED;
                 }
                 this.eventEmitter.emit(`rejectedHandlerCalled_${handler.idx}`, {detail});

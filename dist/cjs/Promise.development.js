@@ -14,51 +14,59 @@ const REJECTED = 'promise rejected';
 const IS_INNER_CALL = 'is inner call';
 const RECORDER = Symbol('recorder instance key');
 
-const createNewPromise = (Promise, currentPromise, onFulfilled, onRejected) => {
+const createNewPromise = (Promise, currentPromise, onFulfilled, onRejected, detail) => {
     return new Promise((resolve, reject) => {
         const recorder = currentPromise[RECORDER];
-        if(!isFunc(onFulfilled)){
-            recorder.eventEmitter.on(FULFILLED, () => {
-                resolve(recorder.result);
-            });
+        if(recorder.settled){
+            if(recorder.fulfilled){
+                resolve(detail.data);
+            }else {
+                reject(detail.rejectedReason);
+            }
         }else {
-            recorder.eventEmitter.on(`fulfilledHandlerCalled_${onFulfilled.idx}`, e => {
-                if(e.detail.settledStatus === FULFILLED){
-                    if(isThenable(e.detail.data)){
-                        e.detail.data.then(data => {
-                            resolve(data);
-                        }, rejectedReason => {
-                            reject(rejectedReason);
-                        }, IS_INNER_CALL);
+            if(!isFunc(onFulfilled)){
+                recorder.eventEmitter.on(FULFILLED, () => {
+                    resolve(recorder.result);
+                });
+            }else {
+                recorder.eventEmitter.on(`fulfilledHandlerCalled_${onFulfilled.idx}`, e => {
+                    if(e.detail.settledStatus === FULFILLED){
+                        if(isThenable(e.detail.data)){
+                            e.detail.data.then(data => {
+                                resolve(data);
+                            }, rejectedReason => {
+                                reject(rejectedReason);
+                            }, IS_INNER_CALL);
+                        }else {
+                            resolve(e.detail.data);
+                        }
                     }else {
-                        resolve(e.detail.data);
+                        reject(e.detail.rejectedReason);
                     }
-                }else {
-                    reject(e.detail.rejectReason);
-                }
-            });
-        }
-        
-        if(!isFunc(onRejected)){
-            recorder.eventEmitter.on(REJECTED, () => {
-                reject(recorder.result);   
-            });
-        }else {
-            recorder.eventEmitter.on(`rejectedHandlerCalled_${onRejected.idx}`, e => {
-                if(e.detail.settledStatus === FULFILLED){
-                    if(isThenable(e.detail.data)){
-                        e.detail.data.then(data => {
-                            resolve(data);
-                        }, rejectedReason => {
-                            reject(rejectedReason);
-                        }, IS_INNER_CALL);
+                });
+            }
+            
+            if(!isFunc(onRejected)){
+                recorder.eventEmitter.on(REJECTED, () => {
+                    reject(recorder.result);   
+                });
+            }else {
+                recorder.eventEmitter.on(`rejectedHandlerCalled_${onRejected.idx}`, e => {
+                    if(e.detail.settledStatus === FULFILLED){
+                        if(isThenable(e.detail.data)){
+                            e.detail.data.then(data => {
+                                resolve(data);
+                            }, rejectedReason => {
+                                reject(rejectedReason);
+                            }, IS_INNER_CALL);
+                        }else {
+                            resolve(e.detail.data);
+                        }
                     }else {
-                        resolve(e.detail.data);
+                        reject(e.detail.rejectedReason);
                     }
-                }else {
-                    reject(e.detail.rejectReason);
-                }
-            });
+                });
+            }
         }
     });
 };
@@ -106,10 +114,11 @@ class Recorder{
                     detail.data = handler(this.result);
                     detail.settledStatus = FULFILLED;
                 }catch(err){
-                    detail.rejectReason = err;
+                    detail.rejectedReason = err;
                     detail.settledStatus = REJECTED;
                 }
                 this.eventEmitter.emit(`fulfilledHandlerCalled_${handler.idx}`, {detail});
+                return detail;
             }
         }
     }
@@ -122,10 +131,11 @@ class Recorder{
                     detail.data = handler(this.result);
                     detail.settledStatus = FULFILLED;
                 }catch(err){
-                    detail.rejectReason = err;
+                    detail.rejectedReason = err;
                     detail.settledStatus = REJECTED;
                 }
                 this.eventEmitter.emit(`fulfilledHandlerCalled_${handler.idx}`, {detail});
+                return detail;
             }
         }
     }
@@ -144,28 +154,28 @@ class Recorder{
                     detail.data = handler(data);
                     detail.settledStatus = FULFILLED;
                 }catch(err){
-                    detail.rejectReason = err;
+                    detail.rejectedReason = err;
                     detail.settledStatus = REJECTED;
                 }
                 this.eventEmitter.emit(`fulfilledHandlerCalled_${handler.idx}`, {detail});
             });
         }
     }
-    reject(rejectReason){
+    reject(rejectedReason){
         if(!this.settled){
             this.settled = true;
             this.rejected = true;
-            this.result = rejectReason;
+            this.result = rejectedReason;
 
             this.eventEmitter.emit(REJECTED);
 
             this.rejectedHandlers.forEach(handler => {
                 const detail = {};
                 try{
-                    detail.data = handler(rejectReason);
+                    detail.data = handler(rejectedReason);
                     detail.settledStatus = FULFILLED;
                 }catch(err){
-                    detail.rejectReason = err;
+                    detail.rejectedReason = err;
                     detail.settledStatus = REJECTED;
                 }
                 this.eventEmitter.emit(`rejectedHandlerCalled_${handler.idx}`, {detail});
@@ -296,10 +306,10 @@ class Promise{
         fulfilledHandler.idx = this[RECORDER].fulfilledHandlers.length;
         rejectedHandler.idx = this[RECORDER].rejectedHandlers.length;
 
-        this[RECORDER].addFulfilledHandlers(fulfilledHandler);
-        this[RECORDER].addRejectedHandlers(rejectedHandler);
+        const fulfilledDetail = this[RECORDER].addFulfilledHandlers(fulfilledHandler);
+        const rejectedDetail = this[RECORDER].addRejectedHandlers(rejectedHandler);
         if(isInnerCall !== IS_INNER_CALL){
-            return createNewPromise(Promise, this, fulfilledHandler, rejectedHandler);
+            return createNewPromise(Promise, this, fulfilledHandler, rejectedHandler, fulfilledDetail || rejectedDetail);
         }
     }
     catch(onRejected){
@@ -314,19 +324,19 @@ class Promise{
     }
 }
 
-var p1 = new Promise((resolve, reject) => {
-    setTimeout(() => {
-        reject('resolved data');
-    }, 1000);
-});
+// var p1 = new Promise((resolve, reject) => {
+//     setTimeout(() => {
+//         reject('resolved data');
+//     }, 1000);
+// });åå
 
-p1.finally(() => console.log('finally1'));
-p1.finally(() => console.log('finally2'));
-p1.finally(() => console.log('finally3'));
-p1.then(data => console.log('111111', data), err => console.log(err));
-p1.then(data => console.log('222222', data), err => console.log(err));
-p1.finally(() => console.log('finally'));
-p1.then(data => console.log('333333', data), err => console.log(err));
+// p1.finally(() => console.log('finally1'));
+// p1.finally(() => console.log('finally2'));
+// p1.finally(() => console.log('finally3'));
+// p1.then(data => console.log('111111', data), err => console.log(err));
+// p1.then(data => console.log('222222', data), err => console.log(err));
+// p1.finally(() => console.log('finally'));
+// p1.then(data => console.log('333333', data), err => console.log(err));
 // const p2 = new Promise((_, reject) => {
 //     setTimeout(() => {
 //         reject('rejected reason');
@@ -338,5 +348,13 @@ p1.then(data => console.log('333333', data), err => console.log(err));
 // }, rejectedReason => {
 //     console.log('---- rejected ----', rejectedReason);
 // });
+
+
+Promise.resolve('test')
+.then(data => {
+    console.log('---- 1 ----', data);
+    return data;
+})
+.then(data => console.log('---- 2 ----', data));
 
 module.exports = Promise;

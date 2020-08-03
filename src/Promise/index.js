@@ -125,10 +125,10 @@ class Promise{
         fulfilledHandler.idx = this[RECORDER].fulfilledHandlers.length;
         rejectedHandler.idx = this[RECORDER].rejectedHandlers.length;
 
-        this[RECORDER].addFulfilledHandlers(fulfilledHandler);
-        this[RECORDER].addRejectedHandlers(rejectedHandler);
+        const fulfilledDetail = this[RECORDER].addFulfilledHandlers(fulfilledHandler);
+        const rejectedDetail = this[RECORDER].addRejectedHandlers(rejectedHandler);
         if(isInnerCall !== IS_INNER_CALL){
-            return createNewPromise(Promise, this, fulfilledHandler, rejectedHandler);
+            return createNewPromise(Promise, this, fulfilledHandler, rejectedHandler, fulfilledDetail || rejectedDetail);
         }
     }
     catch(onRejected){
@@ -145,19 +145,19 @@ class Promise{
 
 export default Promise;
 
-var p1 = new Promise((resolve, reject) => {
-    setTimeout(() => {
-        reject('resolved data');
-    }, 1000);
-});
+// var p1 = new Promise((resolve, reject) => {
+//     setTimeout(() => {
+//         reject('resolved data');
+//     }, 1000);
+// });åå
 
-p1.finally(() => console.log('finally1'));
-p1.finally(() => console.log('finally2'));
-p1.finally(() => console.log('finally3'));
-p1.then(data => console.log('111111', data), err => console.log(err));
-p1.then(data => console.log('222222', data), err => console.log(err));
-p1.finally(() => console.log('finally'));
-p1.then(data => console.log('333333', data), err => console.log(err));
+// p1.finally(() => console.log('finally1'));
+// p1.finally(() => console.log('finally2'));
+// p1.finally(() => console.log('finally3'));
+// p1.then(data => console.log('111111', data), err => console.log(err));
+// p1.then(data => console.log('222222', data), err => console.log(err));
+// p1.finally(() => console.log('finally'));
+// p1.then(data => console.log('333333', data), err => console.log(err));
 // const p2 = new Promise((_, reject) => {
 //     setTimeout(() => {
 //         reject('rejected reason');
@@ -170,6 +170,13 @@ p1.then(data => console.log('333333', data), err => console.log(err));
 //     console.log('---- rejected ----', rejectedReason);
 // });
 
+
+Promise.resolve('test')
+.then(data => {
+    console.log('---- 1 ----', data);
+    return data;
+})
+.then(data => console.log('---- 2 ----', data))
 
 
 
