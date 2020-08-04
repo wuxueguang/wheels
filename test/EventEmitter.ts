@@ -9,3 +9,5 @@ eventEmitter.once('test', () => {
 
 eventEmitter.emit('test')
 eventEmitter.emit('test')
+
+console.log(eventEmitter[Symbol.for('recorder property key')])

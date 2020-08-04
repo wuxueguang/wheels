@@ -1,6 +1,6 @@
 
 import EventEmitter from '../EventEmitter/index';
-import { isFunc } from '../utils/index';
+import { isFunc } from '../utils/funcs';
 import { FULFILLED, REJECTED } from './consts';
 
 class Recorder{

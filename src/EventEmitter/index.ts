@@ -1,6 +1,6 @@
-import { isFunc } from "../utils/index";
+import { isFunc } from "../utils/funcs";
 
-const RECORDER = Symbol('recorder key');
+const RECORDER = Symbol('recorder property key');
 
 class EventEmitter{
     [RECORDER] = new Map
@@ -22,21 +22,21 @@ class EventEmitter{
         this[RECORDER].get(eventType).push(handler);
         return this;
     }
-    on(eventType, handler){
-        return this.addListener(eventType, handler);
-    }
     removeListener(eventType, handler){
         const handlers = this[RECORDER].get(eventType);
         while(handlers.includes(handler)){
             handler[handler.indexOf(handler)] = undefined;
         }
     }
-    off(eventType, handler){
-        this.removeListener(eventType, handler);
-    }
     once(eventType, handler){
         handler.left = 1;
         this.addListener(eventType, handler);
+    }
+    on(eventType, handler){
+        return this.addListener(eventType, handler);
+    }
+    off(eventType, handler){
+        this.removeListener(eventType, handler);
     }
 }
 

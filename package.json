@@ -4,7 +4,7 @@
   "description": "Learnn more API by coding them.",
   "main": "index.js",
   "scripts": {
-    "dev": "cross-env rollup --watch --config rollup.config.js"
+    "dev": "cross-env node scripts/dev.js"
   },
   "repository": {
     "type": "git",
@@ -19,6 +19,11 @@
   "devDependencies": {
     "babel-eslint": "^10.1.0",
     "cross-env": "^7.0.2",
-    "exlint": "^0.1.6"
+    "eslint-scope": "^5.1.0",
+    "exlint": "^0.1.6",
+    "rollup": "^2.23.0",
+    "rollup-plugin-typescript": "^1.0.1",
+    "tslib": "^2.0.0",
+    "typescript": "^3.9.7"
   }
 }

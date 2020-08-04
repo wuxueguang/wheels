@@ -1,5 +1,5 @@
 
-import { isFunc, isThenable } from '../utils/index';
+import { isFunc, isThenable } from '../utils/funcs';
 import { RECORDER, IS_INNER_CALL, FULFILLED, REJECTED } from './consts';
 
 const createNewPromise = (Promise, currentPromise, onFulfilled, onRejected, detail) => {
