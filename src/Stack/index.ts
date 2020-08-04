@@ -7,5 +7,10 @@ class Stack{
     constructor(){
 
     }
-    
+    push(item){
+
+    }
+    pop(){
+
+    }
 }
